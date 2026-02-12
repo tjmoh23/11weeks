@@ -28,7 +28,47 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 ####### A 작업자 작업 수행 #######
 
 ''' 코드 작성 바랍니다 '''
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report
 
+#  HyperParameter Tunning
+param_grid = {
+    "criterion" : ['gini', 'entropy'],
+    "max_depth" : [2,5],
+    "min_samples_split": [2, 10],
+    "min_samples_leaf": [1, 2, 4]
+}
+
+# DT 모델 생성 및 그리드서치
+dt_grid = DecisionTreeClassifier(random_state= 42)
+df_grid_search = GridSearchCV(dt_grid, param_grid, cv = 5)
+df_grid_search.fit(X_train, y_train)
+
+print("Best Hyper-parameter", df_grid_search.best_params_)
+print("Best Score", df_grid_search.best_score_)
+
+
+# 정확도 계산 
+dt_best_model = df_grid_search.best_estimator_
+
+dt_y_pred_grid = dt_best_model.predict(X_test)
+dt_accuracy_grid = accuracy_score(y_test, dt_y_pred_grid)
+# print('Accuracy Grid :', accuracy_grid)
+
+
+# Feature Importance를 계산
+dt_importances = dt_best_model.feature_importances_
+
+# Best model의 Feature Importance를 시각화
+plt.figure(figsize = (20,6))
+
+# 막대 그래프 생성
+plt.bar(range(len(dt_importances)), dt_importances, width=0.3)
+plt.xlabel('Feature')
+plt.ylabel('importances')
+plt.title('Feature Importance')
+plt.xticks(range(len(dt_importances)), X.columns, rotation = 45)
+plt.show()
 
 
 ####### B 작업자 작업 수행 #######
