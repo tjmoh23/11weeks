@@ -74,4 +74,46 @@ plt.show()
 ####### B 작업자 작업 수행 #######
 
 ''' 코드 작성 바랍니다 '''
+# Xgboost
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score, classification_report
 
+# 하이퍼파라미터 범위지정
+params = {
+    "max_depth" : [3, 5, 7, 9, 15],
+    "learning_rate" : [0.1, 0.01, 0.001],
+    "n_estimators": [50, 100, 200, 300]
+}
+
+# XGboost 모델 생성
+xgb_model = XGBClassifier(random_state=42)
+
+# 하이퍼파라미터 최적화 
+xg_grid_search = GridSearchCV(estimator=xgb_model, param_grid=params, cv=5, scoring='accuracy', n_jobs=-1)
+xg_grid_search.fit(X_train, y_train)
+
+print("Best parameters:", xg_grid_search.best_params_)
+print("Best accuracy:" , xg_grid_search.best_score_)
+
+
+# 정확도 계산 
+xg_best_model = xg_grid_search.best_estimator_
+
+xg_y_pred_grid = xg_best_model.predict(X_test)
+xg_accuracy_grid = accuracy_score(y_test, xg_y_pred_grid)
+# print('Accuracy Grid :', xg_accuracy_grid)
+
+
+# Feature Importance를 계산
+xg_importances = xg_best_model.feature_importances_
+
+# Best model의 Feature Importance를 시각화
+plt.figure(figsize = (20,6))
+
+# 막대 그래프 생성
+plt.bar(range(len(xg_importances)), xg_importances, width=0.3)
+plt.xlabel('Feature')
+plt.ylabel('importances')
+plt.title('Feature Importance')
+plt.xticks(range(len(xg_importances)), X.columns, rotation = 45)
+plt.show()
